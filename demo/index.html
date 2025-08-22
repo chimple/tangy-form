@@ -97,7 +97,7 @@
         <template>
           <tangy-form id="fruit-survey" title="Fruit Survey">
             <tangy-form-item id="item1" title="Fruit Survey">
-              <tangy-input
+              <!-- <tangy-input
                 name="tangy_input"
                 type="text"
                 label="This is a regular tangy input label."
@@ -106,14 +106,14 @@
                 hint-text="This is <b>hint text</b>"
                 error-message="This is a custom <t-lang en>error message</t-lang>"
                 required>
-              </tangy-input>
-              <tangy-input
+              </tangy-input> -->
+              <!-- <tangy-input
                 name="tangy_input"
                 type="email"
                 label="This is an email tangy input."
                 required>
-              </tangy-input>
-              <tangy-photo-capture name="picture" compression="0.10" max-size-in-kb=2000></tangy-photo-capture>
+              </tangy-input> -->
+              <!-- <tangy-photo-capture name="picture" compression="0.10" max-size-in-kb=2000></tangy-photo-capture> -->
 <!--              <tangy-video-capture name="test-video" label="Take a video" ></tangy-video-capture>-->
               <tangy-radio-buttons
                 name="fruit_selection"
@@ -133,7 +133,7 @@
                 <option name="banana">Banana</option>
                 <option name="tangerine"><b>Tangerine</b></option>
               </tangy-select>
-              <tangy-checkboxes
+              <!-- <tangy-checkboxes
                 name="fruit_time"
                 label="What <b>time</b> do you take fruit?"
                 hint-text="This is <b>hint text</b>."
@@ -165,13 +165,35 @@
                 label="Scan a QR code"
                 hint-text="This is <b>hint text</b>."
                 required>
-              </tangy-qr>
+              </tangy-qr> -->
             </tangy-form-item>
-            <tangy-form-item id="summary" title="Summary" on-change="debugger">
+            <!-- <tangy-form-item id="summary" title="Summary" on-change="debugger">
               <tangy-input name="comments" label="Comments"></tangy-input>
               Thank you for taking our survey.
-            </tangy-form-item>
+            </tangy-form-item> -->
           </tangy-form>
+          <script>
+            const myForm = document.querySelector('#fruit-survey');
+      
+            // Store the previous state to compare against
+            let previousStatementsJson = '[]';
+      
+            myForm.addEventListener('TANGY_FORM_UPDATE', event => {
+              const currentState = event.target.store.getState();
+              const statements = currentState.xapiStatements || [];
+              const currentStatementsJson = JSON.stringify(statements);
+      
+              // Only log if the statements array has actually changed content
+              if (currentStatementsJson !== previousStatementsJson) {
+                console.clear(); // Optional: clear console for better visibility
+                console.log('xAPI Statements Updated:');
+                console.log(statements); // Log the entire array to see updates
+                console.log('---');
+                console.log('Full State:', currentState);
+                previousStatementsJson = currentStatementsJson;
+              }
+            });
+          </script>
         </template>
       </demo-snippet>
 

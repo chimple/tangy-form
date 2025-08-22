@@ -709,6 +709,10 @@ export class TangyFormItem extends PolymerElement {
           _.stopPropagation()
           this.fireHook('on-change', _)
         })
+        input.addEventListener('tangy-form-statement', (e) => {
+          e.stopPropagation();
+          this.onTangyFormStatement(e);
+        })  
       })
     let tangyCompleteButtonEl = this
       .querySelector('tangy-complete-button')
@@ -758,6 +762,14 @@ export class TangyFormItem extends PolymerElement {
       this.fireHook('custom-scoring-logic')
     }
     this.dispatchEvent(new CustomEvent('TANGY_FORM_ITEM_OPENED'))
+  }
+
+  onTangyFormStatement(event) {
+    const statement = event.detail;
+    this.store.dispatch({
+      type: 'XAPI_STATEMENT_UPSERT',
+      statement: event.detail
+    });
   }
 
   onDisabledChange(newState, oldState) {
@@ -878,6 +890,36 @@ export class TangyFormItem extends PolymerElement {
         percentEl.value = percent
         this.inputs = [...this.inputs, percentEl.getModProps && window.useShrinker ? percentEl.getModProps() : percentEl.getProps()]
       }
+
+        // --- xAPI Integration: Update 'attempted' to 'answered' on submit ---
+        const state = this.store.getState();
+        const xapiStatements = state.xapiStatements || [];
+        const formItemInputs = this.querySelectorAll('[name]');
+        
+      
+        formItemInputs.forEach(input => {
+        const baseUrl = window.location.origin + window.location.pathname.replace(/\/$/, '');
+        const formEl = input.closest('tangy-form');
+        const itemEl = input.closest('tangy-form-item');
+        const formId = formEl ? formEl.id : 'unknown-form';
+        const itemId = itemEl ? itemEl.id : 'unknown-item';
+        const inputId = input.name || input.id;
+        const objectId = `${baseUrl}/${formId}/${itemId}/${inputId}`;
+        const statementToUpdate = xapiStatements.find(
+          s => s.object.id === objectId && s.verb.id === 'http://adlnet.gov/xapi/verbs/attempted'
+        );
+
+        if (statementToUpdate) {
+          const answeredStatement = {
+            ...statementToUpdate,
+            verb: {
+              id: 'http://adlnet.gov/expapi/verbs/answered',
+              display: { 'en-US': 'answered' }
+            }
+          };
+          this.store.dispatch({ type: 'XAPI_STATEMENT_UPSERT', statement: answeredStatement });
+        }
+      });
     }
     return true
   }

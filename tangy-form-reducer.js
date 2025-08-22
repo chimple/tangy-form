@@ -5,7 +5,8 @@ const initialState = {
   collection: 'TangyFormResponse',
   startDate: (new Date()).toLocaleString(),
   items: [],
-  inputs: []
+  inputs: [],
+  xapiStatements: []
 }
 
 const tangyFormReducer = function (state = initialState, action) {
@@ -14,6 +15,19 @@ const tangyFormReducer = function (state = initialState, action) {
   var firstNotDisabled = 0
 
   switch(action.type) {
+
+    case 'XAPI_STATEMENT_UPSERT':
+      const newStatements = [...state.xapiStatements];
+      const existingStatementIndex = newStatements.findIndex(
+        s => s.object.id === action.statement.object.id
+      );
+
+      if (existingStatementIndex > -1) {
+        newStatements[existingStatementIndex] = action.statement;
+      } else {
+        newStatements.push(action.statement);
+      }
+      return Object.assign({}, state, { xapiStatements: newStatements });
 
     case 'FORM_OPEN':
       let {cycleSequences} = action.response.form;

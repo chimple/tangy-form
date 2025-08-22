@@ -148,6 +148,51 @@ class TangySelect extends TangyInputBase {
     const observer = new MutationObserver(this.render.bind(this))
     observer.observe(this, { attributes: true, childList: true, subtree: true })
     this.render()
+    // this._interactionStartTime = new Date();
+
+    // --- xAPI Integration: statement template ---
+    const options = [...this.querySelectorAll('option')];
+
+    const choices = options
+      .filter(option => option.value) // Filter out placeholder options
+      .map(option => ({
+        id: option.value,
+        description: { 'en-US': option.innerHTML.replace(/<[^>]*>?/gm, '') }
+      }));
+
+    // const correctResponsesPattern = options
+    //   .filter(option => option.hasAttribute('correct'))
+    //   .map(option => option.value);
+
+    const cleanLabel = (this.label || this.name).replace(/<[^>]*>?/gm, '');
+
+    const formEl = this.closest('tangy-form');
+    const itemEl = this.closest('tangy-form-item');
+    const formId = formEl ? formEl.id : 'unknown-form';
+    const itemId = itemEl ? itemEl.id : 'unknown-item';
+    const inputId = this.name || this.id;
+
+    const baseUrl = window.location.origin + window.location.pathname.replace(/\/$/, '');
+    const objectId = `${baseUrl}/${formId}/${itemId}/${inputId}`;
+
+    this._xapiStatementTemplate = {
+      verb: {
+        id: 'http://adlnet.gov/xapi/verbs/attempted',
+        display: { 'en-US': 'attempted' }
+      },
+      object: {
+        id: objectId,
+        objectType: 'Activity',
+        definition: {
+          name: { 'en-US': this.name || this.id },
+          description: { 'en-US': cleanLabel },
+          type: 'http://adlnet.gov/expapi/activities/cmi.interaction',
+          interactionType: 'choice',
+          choices: choices,
+          // correctResponsesPattern: correctResponsesPattern
+        }
+      }
+    };
   }
   
   render() {
@@ -184,8 +229,31 @@ class TangySelect extends TangyInputBase {
   }
 
   onChange(event) {
-    this.value = event.target.value 
-    this.dispatchEvent(new CustomEvent('change'))
+    this.value = event.target.value;
+    
+    // const durationInSeconds = Math.round((new Date() - this._interactionStartTime) / 1000);
+    // const isoDuration = `PT${durationInSeconds}S`;
+
+    // --- xAPI Integration ---
+    const partialStatement = {
+      ...this._xapiStatementTemplate,
+      result: {
+        success: false, //write logic to determine success
+        response: this.value,
+        // duration: isoDuration
+      },
+      timestamp: (new Date()).toISOString()
+    };
+
+    // if (partialStatement.object.definition.correctResponsesPattern.length > 0) {
+    //   partialStatement.result.success = partialStatement.object.definition.correctResponsesPattern.includes(this.value);
+    // }
+
+    this.dispatchEvent(new CustomEvent('tangy-form-statement', { detail: partialStatement, bubbles: true }));
+    // this._interactionStartTime = new Date();
+    // --- End xAPI Integration ---
+
+    this.dispatchEvent(new CustomEvent('change'));
   }
 
   validate() {
