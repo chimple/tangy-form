@@ -143,11 +143,52 @@ class TangySelect extends TangyInputBase {
     }
   }
 
+  // this method generate object id for xAPI statement based on form, item, and input ids
+  _generateObjectId() {
+    const formEl = this.closest('tangy-form');
+    const itemEl = this.closest('tangy-form-item');
+    const formId = formEl ? formEl.id : 'unknown-form';
+    const itemId = itemEl ? itemEl.id : 'unknown-item';
+    const inputId = this.name || this.id;
+    const baseUrl = window.location.origin + window.location.pathname.replace(/\/$/, '');
+    return `${baseUrl}/${formId}/${itemId}/${inputId}`;
+  };
+
   connectedCallback() {
     super.connectedCallback()
     const observer = new MutationObserver(this.render.bind(this))
     observer.observe(this, { attributes: true, childList: true, subtree: true })
     this.render()
+    const options = Array.from(this.shadowRoot.querySelectorAll('select option'))
+    .filter(opt => opt.value);
+
+    const choices = options.map(option => ({
+      id: option.value,
+      description: { 'en-US': option.textContent.trim() }
+    }));
+
+    // clean the label of any HTML tags
+    const label = (this.label || this.name).replace(/<[^>]*>?/gm, '');
+    const objectId = this._generateObjectId();
+    
+    // template for xAPI statement generation, will move it in util after approval
+    this._xapiStatementTemplate = {
+      verb: {
+        id: 'http://adlnet.gov/xapi/verbs/attempted',
+        display: { 'en-US': 'attempted' }
+      },
+      object: {
+        id: objectId,
+        objectType: 'Activity',
+        definition: {
+          name: { 'en-US': this.name || this.id },
+          description: { 'en-US': label },
+          type: 'http://adlnet.gov/expapi/activities/cmi.interaction',
+          interactionType: 'choice',
+          choices: choices,
+        }
+      }
+    };
   }
   
   render() {
@@ -184,7 +225,15 @@ class TangySelect extends TangyInputBase {
   }
 
   onChange(event) {
-    this.value = event.target.value 
+    this.value = event.target.value;    
+    const partialStatement = {
+      ...this._xapiStatementTemplate,
+      result: {
+        success: false,
+        response: this.value,
+      },
+    };
+    this.dispatchEvent(new CustomEvent('statement', { detail: partialStatement, bubbles: true }));
     this.dispatchEvent(new CustomEvent('change'))
   }
 

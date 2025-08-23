@@ -5,7 +5,8 @@ const initialState = {
   collection: 'TangyFormResponse',
   startDate: (new Date()).toLocaleString(),
   items: [],
-  inputs: []
+  inputs: [],
+  xapiStatements: []
 }
 
 const tangyFormReducer = function (state = initialState, action) {
@@ -425,6 +426,19 @@ const tangyFormReducer = function (state = initialState, action) {
           return { ...item, fullscreenEnabled: false}
         })
       }
+    
+    case 'XAPI_STATEMENT_UPSERT':
+      const newStatements = [...state.xapiStatements];
+      const existingStatementIndex = newStatements.findIndex(
+        statement => statement.object.id === action.statement.object.id
+      );
+
+      if (existingStatementIndex > -1) {
+        newStatements[existingStatementIndex] = action.statement;
+      } else {
+        newStatements.push(action.statement);
+      }
+      return Object.assign({}, state, { xapiStatements: newStatements });
 
     default: 
       return state
