@@ -229,7 +229,6 @@ class TangySelect extends TangyInputBase {
     const partialStatement = {
       ...this._xapiStatementTemplate,
       result: {
-        success: false,
         response: this.value,
       },
     };
