@@ -19,7 +19,6 @@ export class TangyFormResponseModel {
     this.uploadDatetime = ''
     this.location = {}
     this.type = 'response'
-    this.xapiStatements = []
     if (props && props.hasOwnProperty('inputs')) delete props.inputs
     Object.assign(this, props)
   }
