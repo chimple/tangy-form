@@ -502,8 +502,7 @@ export class TangyForm extends PolymerElement {
     })
 
     this.store.subscribe(_ => {
-      const state = this.store.getState();
-      this.dispatchEvent(new CustomEvent('TANGY_FORM_STATEMENT', { detail: state.xapiStatements }));
+      this.dispatchEvent(new CustomEvent('TANGY_FORM_STATEMENT'));
     })
 
     if (this.hasAttribute('on-submit')) {

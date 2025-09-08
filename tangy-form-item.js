@@ -709,10 +709,6 @@ export class TangyFormItem extends PolymerElement {
           _.stopPropagation()
           this.fireHook('on-change', _)
         })
-        input.addEventListener('statement', (e) => {
-          e.stopPropagation();
-          this.onTangyFormStatement(e);
-        });
       })
     let tangyCompleteButtonEl = this
       .querySelector('tangy-complete-button')
@@ -763,15 +759,6 @@ export class TangyFormItem extends PolymerElement {
     }
     this.dispatchEvent(new CustomEvent('TANGY_FORM_ITEM_OPENED'))
   }
-
-  // trigger store update on onChange method
-  onTangyFormStatement(event) {
-    const xapiStatement = event.detail;
-    this.store.dispatch({
-      type: 'XAPI_STATEMENT_UPSERT',
-      statement: xapiStatement
-    });
-  };
 
   onDisabledChange(newState, oldState) {
     if (newState === true && oldState === false) {

@@ -143,6 +143,16 @@ class TangySelect extends TangyInputBase {
     }
   }
 
+  get _xapiStatement() {
+      return {
+        ...this._xapiStatementTemplate,
+        result: {
+          response: this.value,
+        },
+      };
+  }
+
+
   // this method generate object id for xAPI statement based on form, item, and input ids
   _generateObjectId() {
     const formEl = this.closest('tangy-form');
@@ -167,8 +177,9 @@ class TangySelect extends TangyInputBase {
       description: { 'en-US': option.textContent.trim() }
     }));
 
-    // clean the label of any HTML tags
-    const label = (this.label || this.name).replace(/<[^>]*>?/gm, '');
+    const temp = document.createElement('div');
+    temp.innerHTML = this.label || this.name;
+    const label = temp.textContent || temp.innerText || '';
     const objectId = this._generateObjectId();
     
     // template for xAPI statement generation, will move it in util after approval
@@ -226,13 +237,6 @@ class TangySelect extends TangyInputBase {
 
   onChange(event) {
     this.value = event.target.value;    
-    const partialStatement = {
-      ...this._xapiStatementTemplate,
-      result: {
-        response: this.value,
-      },
-    };
-    this.dispatchEvent(new CustomEvent('statement', { detail: partialStatement, bubbles: true }));
     this.dispatchEvent(new CustomEvent('change'))
   }
 

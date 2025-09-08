@@ -7,6 +7,14 @@ export class TangyInputBase extends PolymerElement {
     this._initialProps = super.getProps()
   }
 
+  getProps() {
+    const baseProps = super.getProps ? super.getProps() : {};
+    return {
+      ...baseProps,
+      xapiStatement: this._xapiStatement || null,
+    };
+  }
+
   getModProps() {
     const initialProps = this._initialProps
     const currentProps = super.getProps()

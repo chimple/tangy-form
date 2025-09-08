@@ -135,6 +135,12 @@ const tangyFormReducer = function (state = initialState, action) {
             } else if (input.tagName === 'TANGY-UNTIMED-GRID') {
               return Object.assign({}, input, {disabled: true, mode: 'TANGY_UNTIMED_GRID_MODE_DISABLED'})
             } else {
+              if (input.xapiStatement && typeof input.xapiStatement === 'object' && input.value !== '') {
+                  input.xapiStatement.verb = {
+                    id: 'http://adlnet.gov/xapi/verbs/answered',
+                    display: { 'en-US': 'answered' }
+                  };
+              }
               return Object.assign({}, input, {disabled: true})
             }
           })
@@ -426,19 +432,6 @@ const tangyFormReducer = function (state = initialState, action) {
           return { ...item, fullscreenEnabled: false}
         })
       }
-    
-    case 'XAPI_STATEMENT_UPSERT':
-      const newStatements = [...state.xapiStatements];
-      const existingStatementIndex = newStatements.findIndex(
-        statement => statement.object.id === action.statement.object.id
-      );
-
-      if (existingStatementIndex > -1) {
-        newStatements[existingStatementIndex] = action.statement;
-      } else {
-        newStatements.push(action.statement);
-      }
-      return Object.assign({}, state, { xapiStatements: newStatements });
 
     default: 
       return state
