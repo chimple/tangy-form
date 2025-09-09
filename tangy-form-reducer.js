@@ -6,7 +6,6 @@ const initialState = {
   startDate: (new Date()).toLocaleString(),
   items: [],
   inputs: [],
-  xapiStatements: []
 }
 
 const tangyFormReducer = function (state = initialState, action) {

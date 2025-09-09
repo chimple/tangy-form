@@ -160,7 +160,11 @@ class TangySelect extends TangyInputBase {
     const formId = formEl ? formEl.id : 'unknown-form';
     const itemId = itemEl ? itemEl.id : 'unknown-item';
     const inputId = this.name || this.id;
-    const baseUrl = window.location.origin + window.location.pathname.replace(/\/$/, '');
+    let path = window.location.pathname;
+    if (path.endsWith("/")) {
+        path = path.slice(0, -1);
+    }
+    const baseUrl = window.location.origin + path;
     return `${baseUrl}/${formId}/${itemId}/${inputId}`;
   };
 
