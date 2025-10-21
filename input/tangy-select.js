@@ -166,7 +166,7 @@ class TangySelect extends TangyInputBase {
     }
     const baseUrl = window.location.origin + path;
     return `${baseUrl}/${formId}/${itemId}/${inputId}`;
-  };
+  };  
 
   connectedCallback() {
     super.connectedCallback()
@@ -175,29 +175,28 @@ class TangySelect extends TangyInputBase {
     this.render()
     const options = Array.from(this.shadowRoot.querySelectorAll('select option'))
     .filter(opt => opt.value);
-
+    
+    const locale = document.documentElement.lang || navigator.language || 'en-US';
     const choices = options.map(option => ({
       id: option.value,
-      description: { 'en-US': option.textContent.trim() }
+      description: { [locale]: option.textContent.trim() }
     }));
-
     const temp = document.createElement('div');
     temp.innerHTML = this.label || this.name;
     const label = temp.textContent || temp.innerText || '';
     const objectId = this._generateObjectId();
-    
     // template for xAPI statement generation, will move it in util after approval
     this._xapiStatementTemplate = {
       verb: {
         id: 'http://adlnet.gov/xapi/verbs/attempted',
-        display: { 'en-US': 'attempted' }
+        display: { [locale]: 'attempted' }
       },
       object: {
         id: objectId,
         objectType: 'Activity',
         definition: {
-          name: { 'en-US': this.name || this.id },
-          description: { 'en-US': label },
+          name: { [locale]: this.name || this.id },
+          description: { [locale]: label },
           type: 'http://adlnet.gov/expapi/activities/cmi.interaction',
           interactionType: 'choice',
           choices: choices,
