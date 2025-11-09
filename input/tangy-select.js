@@ -176,7 +176,7 @@ class TangySelect extends TangyInputBase {
     const options = Array.from(this.shadowRoot.querySelectorAll('select option'))
     .filter(opt => opt.value);
     
-    const locale = document.documentElement.lang || navigator.language || 'en-US';
+    const locale = document.documentElement.lang || navigator.language;
     const choices = options.map(option => ({
       id: option.value,
       description: { [locale]: option.textContent.trim() }
@@ -239,7 +239,7 @@ class TangySelect extends TangyInputBase {
   }
 
   onChange(event) {
-    this.value = event.target.value;    
+    this.value = event.target.value
     this.dispatchEvent(new CustomEvent('change'))
   }
 
