@@ -239,7 +239,7 @@ class TangySelect extends TangyInputBase {
   }
 
   onChange(event) {
-    this.value = event.target.value
+    this.value = event.target.value 
     this.dispatchEvent(new CustomEvent('change'))
   }
 
