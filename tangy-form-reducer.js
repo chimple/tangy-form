@@ -134,11 +134,9 @@ const tangyFormReducer = function (state = initialState, action) {
             } else if (input.tagName === 'TANGY-UNTIMED-GRID') {
               return Object.assign({}, input, {disabled: true, mode: 'TANGY_UNTIMED_GRID_MODE_DISABLED'})
             } else {
-              const locale = document.documentElement.lang || navigator.language;
               if (input.xapiStatement && typeof input.xapiStatement === 'object' && input.value !== '') {
                   input.xapiStatement.verb = {
                     id: 'http://adlnet.gov/xapi/verbs/answered',
-                    display: { [locale]: 'answered' }
                   };
               }
               return Object.assign({}, input, {disabled: true})

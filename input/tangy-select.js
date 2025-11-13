@@ -189,7 +189,6 @@ class TangySelect extends TangyInputBase {
     this._xapiStatementTemplate = {
       verb: {
         id: 'http://adlnet.gov/xapi/verbs/attempted',
-        display: { [locale]: 'attempted' }
       },
       object: {
         id: objectId,
