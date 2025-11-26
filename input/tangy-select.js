@@ -6,6 +6,7 @@ import '../style/mdc-select-style.js'
 import { combTranslations } from 'translation-web-component/util.js'
 import { t } from '../util/t.js'
 import { TangyInputBase } from '../tangy-input-base.js'
+import { generateXapiStatement } from '../util/tangy.utils.js';
 
 /**
  * `tangy-select`
@@ -150,23 +151,7 @@ class TangySelect extends TangyInputBase {
           response: this.value,
         },
       };
-  }
-
-
-  // this method generate object id for xAPI statement based on form, item, and input ids
-  _generateObjectId() {
-    const formEl = this.closest('tangy-form');
-    const itemEl = this.closest('tangy-form-item');
-    const formId = formEl ? formEl.id : 'unknown-form';
-    const itemId = itemEl ? itemEl.id : 'unknown-item';
-    const inputId = this.name || this.id;
-    let path = window.location.pathname;
-    if (path.endsWith("/")) {
-        path = path.slice(0, -1);
-    }
-    const baseUrl = window.location.origin + path;
-    return `${baseUrl}/${formId}/${itemId}/${inputId}`;
-  };  
+  }  
 
   connectedCallback() {
     super.connectedCallback()
@@ -175,33 +160,10 @@ class TangySelect extends TangyInputBase {
     this.render()
     const options = Array.from(this.shadowRoot.querySelectorAll('select option'))
     .filter(opt => opt.value);
-    
-    const locale = document.documentElement.lang || navigator.language;
-    const choices = options.map(option => ({
-      id: option.value,
-      description: { [locale]: option.textContent.trim() }
-    }));
-    const temp = document.createElement('div');
-    temp.innerHTML = this.label || this.name;
-    const label = temp.textContent || temp.innerText || '';
-    const objectId = this._generateObjectId();
-    // template for xAPI statement generation, will move it in util after approval
-    this._xapiStatementTemplate = {
-      verb: {
-        id: 'http://adlnet.gov/xapi/verbs/attempted',
-      },
-      object: {
-        id: objectId,
-        objectType: 'Activity',
-        definition: {
-          name: { [locale]: this.name || this.id },
-          description: { [locale]: label },
-          type: 'http://adlnet.gov/expapi/activities/cmi.interaction',
-          interactionType: 'choice',
-          choices: choices,
-        }
-      }
-    };
+    this._xapiStatementTemplate = generateXapiStatement({
+      element: this,
+      interactionType: 'choice'
+    });
   }
   
   render() {

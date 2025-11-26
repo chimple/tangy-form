@@ -139,9 +139,22 @@ export class TangyCheckbox extends TangyInputBase {
     }
   }
 
+  get _xapiStatement(){
+    return {
+      ...this._xapiStatementTemplate,
+      result: {
+        response: this.value,
+      },
+    };
+  }
+
   connectedCallback () {
-    super.connectedCallback()
+    super.connectedCallback();
     this.render()
+    this._xapiStatementTemplate = generateXapiStatement({
+      element: this,
+      interactionType: 'choice'
+    });
   }
 
   render() {

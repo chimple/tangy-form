@@ -5,6 +5,7 @@ import './tangy-radio-button.js'
 import '../style/tangy-element-styles.js';
 import '../style/tangy-common-styles.js'
 import { TangyInputBase } from '../tangy-input-base.js'
+import { generateXapiStatement } from '../util/tangy.utils.js';
 /**
  * `tangy-radio-buttons`
  *
@@ -201,10 +202,23 @@ class TangyRadioButtons extends TangyInputBase {
     }
   }
 
+  get _xapiStatement() {
+    return {
+      ...this._xapiStatementTemplate,
+      result: {
+        response: this.value,
+      },
+    };
+  }
+
   ready() {
-    super.ready()
+    super.ready() 
     this.render()
     this.reflect()
+    this._xapiStatementTemplate = generateXapiStatement({
+      element: this,
+      interactionType: 'choice'
+    });
   }
 
   reflect() {

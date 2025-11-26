@@ -5,6 +5,7 @@ import './tangy-checkbox.js'
 import '../style/tangy-element-styles.js';
 import '../style/tangy-common-styles.js'
 import { TangyInputBase } from '../tangy-input-base.js'
+import { generateXapiStatement } from '../util/tangy.utils.js';
 
 /**
  * `tangy-checkboxes`
@@ -135,8 +136,18 @@ class TangyCheckboxesDynamic extends TangyInputBase {
     this._optionsList = optionsList
   }
 
+  get _xapiStatement(){
+    return {
+      ...this._xapiStatementTemplate,
+      result: {
+        response: this.value,
+      },
+    };
+  }
+
+
   connectedCallback() {
-    super.connectedCallback()
+    super.connectedCallback();
 
     let that = this
     const request = new XMLHttpRequest();
@@ -167,6 +178,7 @@ class TangyCheckboxesDynamic extends TangyInputBase {
 
           that.render()
           that.dispatchEvent(new CustomEvent('checkbox-options-loaded'))
+          
         } catch (e) {
           // Do nothing. Some stages will not have valid JSON returned.
         }
@@ -199,6 +211,11 @@ class TangyCheckboxesDynamic extends TangyInputBase {
       this.value = newValue
     }
     containerEl.appendChild(checkboxesEl)
+    this._xapiStatementTemplate = generateXapiStatement({
+      element: this,
+      optionList: this.optionsList,
+      interactionType: 'choice'
+    });
   }
 
   onCheckboxesClick(event) {
