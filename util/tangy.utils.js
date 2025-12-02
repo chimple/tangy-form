@@ -1,4 +1,4 @@
-function _generateObjectId(element) {
+export function _generateObjectId(element) {
   const formEl = element.closest('tangy-form');
   const itemEl = element.closest('tangy-form-item');
   const formId = formEl ? formEl.id : 'unknown-form';
@@ -23,7 +23,6 @@ function generateChoice(element, locale) {
 export function generateXapiStatement({
   element,
   interactionType,
-  optionList
 }) {
   const locale = document.documentElement.lang || navigator.language;
   const tempDiv = document.createElement('div');
@@ -37,7 +36,7 @@ export function generateXapiStatement({
     interactionType,
     // this check if interactionType is 'choice' before adding choices other wise it remove choices
     ...(interactionType === 'choice' && {
-      choices: optionList ? optionList : generateChoice(element, locale)
+      choices: generateChoice(element, locale)
     })
   };
 

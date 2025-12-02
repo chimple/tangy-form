@@ -5,7 +5,7 @@ import './tangy-checkbox.js'
 import '../style/tangy-element-styles.js';
 import '../style/tangy-common-styles.js'
 import { TangyInputBase } from '../tangy-input-base.js'
-import { generateXapiStatement } from '../util/tangy.utils.js';
+import { _generateObjectId } from '../util/tangy.utils.js';
 
 /**
  * `tangy-checkboxes`
@@ -145,6 +145,34 @@ class TangyCheckboxesDynamic extends TangyInputBase {
     };
   }
 
+generateXapiStatement() {
+  const locale = document.documentElement.lang || navigator.language;
+  const tempDiv = document.createElement('div');
+  tempDiv.innerHTML = this.label || this.name;
+  const label = tempDiv.textContent || tempDiv.innerText || '';
+  const objectId = _generateObjectId(this);
+  const definition = {
+    name: { [locale]: this.name || this.id },
+    description: { [locale]: label },
+    type: 'http://adlnet.gov/expapi/activities/cmi.interaction',
+    interactionType: 'choice',
+    choices: this.optionsList.map(option => ({
+      id: option.innerHTML,
+      description: { [locale]: option.innerHTML }
+    })),
+  };
+  return {
+    verb: {
+      id: 'http://adlnet.gov/xapi/verbs/attempted',
+    },
+    object: {
+      id: objectId,
+      objectType: 'Activity',
+      definition,
+    }
+  };
+}
+
 
   connectedCallback() {
     super.connectedCallback();
@@ -211,11 +239,7 @@ class TangyCheckboxesDynamic extends TangyInputBase {
       this.value = newValue
     }
     containerEl.appendChild(checkboxesEl)
-    this._xapiStatementTemplate = generateXapiStatement({
-      element: this,
-      optionList: this.optionsList,
-      interactionType: 'choice'
-    });
+    this._xapiStatementTemplate = this.generateXapiStatement();
   }
 
   onCheckboxesClick(event) {

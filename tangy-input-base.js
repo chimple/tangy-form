@@ -1,4 +1,5 @@
 import { PolymerElement } from '@polymer/polymer/polymer-element.js';
+import { shouldIncludeXapi } from './util/tangy.utils';
 
 export class TangyInputBase extends PolymerElement {
 
@@ -9,9 +10,10 @@ export class TangyInputBase extends PolymerElement {
 
   getProps() {
     const baseProps = super.getProps ? super.getProps() : {};
+    const inputXapiStatement = shouldIncludeXapi(this) ? (this._xapiStatement || null) : null;
     return {
       ...baseProps,
-      xapiStatement: this._xapiStatement || null,
+      xapiStatement: inputXapiStatement,
     };
   }
 
