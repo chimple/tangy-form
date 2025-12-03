@@ -206,7 +206,7 @@ class TangyRadioButtons extends TangyInputBase {
     return {
       ...this._xapiStatementTemplate,
       result: {
-        response: this.value,
+        response: (this.value.find(v => v.value === 'on') || {}).name || '',
       },
     };
   }
@@ -278,6 +278,7 @@ class TangyRadioButtons extends TangyInputBase {
         newValue.push(el.getProps())
       })
     if (!this.value || (typeof this.value === 'object' && this.value.length < newValue.length)) {
+      console.log('setting value', newValue);
       this.value = newValue
     }
 

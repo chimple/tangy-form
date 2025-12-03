@@ -4,6 +4,7 @@ import '@polymer/paper-radio-button/paper-radio-button.js'
 import '../style/tangy-common-styles.js'
 import '../style/tangy-element-styles.js'
 import { TangyInputBase } from '../tangy-input-base.js'
+import { generateXapiStatement } from '../util/tangy.utils.js';
 
     /**
      * `tangy-radio-button`
@@ -94,6 +95,15 @@ export class TangyRadioButton extends TangyInputBase {
     }
   }
 
+  get _xapiStatement(){
+    return {
+      ...this._xapiStatementTemplate,
+      result: {
+        response: this.value,
+      },
+    };
+  }
+
   connectedCallback() {
     super.connectedCallback()
     this.render()
@@ -149,6 +159,11 @@ export class TangyRadioButton extends TangyInputBase {
       if (document.documentElement.langDirection) {
         this.shadowRoot.querySelector('paper-radio-button').dir = document.documentElement.langDirection;
       }
+    });
+
+    this._xapiStatementTemplate = generateXapiStatement({
+      element: this,
+      interactionType: 'fill-in'
     });
   }
 
