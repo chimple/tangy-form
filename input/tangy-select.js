@@ -6,7 +6,7 @@ import '../style/mdc-select-style.js'
 import { combTranslations } from 'translation-web-component/util.js'
 import { t } from '../util/t.js'
 import { TangyInputBase } from '../tangy-input-base.js'
-import { generateXapiStatement } from '../util/tangy.utils.js';
+import { _generateObjectId } from '../util/tangy.utils.js';
 
 /**
  * `tangy-select`
@@ -153,6 +153,42 @@ class TangySelect extends TangyInputBase {
       };
   }  
 
+  generateXapiStatement() {
+    const locale = document.documentElement.lang || navigator.language;
+
+    // get label from this.label or this.name, stripping any HTML tags
+    const tempDiv = document.createElement('div');
+    tempDiv.innerHTML = element.label || element.name;
+    const label = tempDiv.textContent || tempDiv.innerText || '';
+    
+    const objectId = _generateObjectId(element);
+    
+    // get options from select element
+    const choices = options.map(option => ({
+      id: option.value,
+      description: { [locale]: option.textContent.trim() }
+    }));
+    const definition = {
+      name: { [locale]: element.name || element.id },
+      description: { [locale]: label },
+      type: 'http://adlnet.gov/expapi/activities/cmi.interaction',
+      interactionType: 'choice',
+      choices
+    };
+  
+    
+    return {
+      verb: {
+        id: 'http://adlnet.gov/xapi/verbs/attempted',
+      },
+      object: {
+        id: objectId,
+        objectType: 'Activity',
+        definition,
+      }
+    };
+  }
+
   connectedCallback() {
     super.connectedCallback()
     const observer = new MutationObserver(this.render.bind(this))
@@ -160,10 +196,7 @@ class TangySelect extends TangyInputBase {
     this.render()
     const options = Array.from(this.shadowRoot.querySelectorAll('select option'))
     .filter(opt => opt.value);
-    this._xapiStatementTemplate = generateXapiStatement({
-      element: this,
-      interactionType: 'choice'
-    });
+    this._xapiStatementTemplate = this.generateXapiStatement();
   }
   
   render() {

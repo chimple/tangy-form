@@ -5,7 +5,7 @@ import './tangy-radio-button.js'
 import '../style/tangy-element-styles.js';
 import '../style/tangy-common-styles.js'
 import { TangyInputBase } from '../tangy-input-base.js'
-import { generateXapiStatement } from '../util/tangy.utils.js';
+import { _generateObjectId } from '../util/tangy.utils.js';
 /**
  * `tangy-radio-buttons`
  *
@@ -211,14 +211,48 @@ class TangyRadioButtons extends TangyInputBase {
     };
   }
 
+generateXapiStatement() {
+  const locale = document.documentElement.lang || navigator.language;
+
+  // get label from this.label or this.name, stripping any HTML tags
+  const tempDiv = document.createElement('div');
+  tempDiv.innerHTML = this.label || this.name;
+  const label = tempDiv.textContent || tempDiv.innerText || '';
+  
+  const objectId = _generateObjectId(this);
+  
+  //creating choices from options
+  const options = Array.from(this.querySelectorAll('option'));
+  const choices = options.map(option => ({
+    id: option.value,
+    description: { [locale]: option.textContent.trim() }
+  }));
+  const definition = {
+    name: { [locale]: this.name || this.id },
+    description: { [locale]: label },
+    type: 'http://adlnet.gov/expapi/activities/cmi.interaction',
+    interactionType: 'choice',
+    choices
+  };
+
+  
+  return {
+    verb: {
+      id: 'http://adlnet.gov/xapi/verbs/attempted',
+    },
+    object: {
+      id: objectId,
+      objectType: 'Activity',
+      definition,
+    }
+  };
+}
+
   ready() {
     super.ready() 
     this.render()
     this.reflect()
-    this._xapiStatementTemplate = generateXapiStatement({
-      element: this,
-      interactionType: 'choice'
-    });
+    this._xapiStatementTemplate = this.generateXapiStatement();
   }
 
   reflect() {

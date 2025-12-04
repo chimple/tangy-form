@@ -183,25 +183,27 @@ class TangyCheckboxes extends TangyInputBase {
 
   generateXapiStatement() {
     const locale = document.documentElement.lang || navigator.language;
+
+    // get label from this.label or this.name, stripping any HTML tags
     const tempDiv = document.createElement('div');
     tempDiv.innerHTML = this.label || this.name;
     const label = tempDiv.textContent || tempDiv.innerText || '';
+
     const objectId = _generateObjectId(this);
     let options = this.querySelectorAll('option');
-    let optionsList = []
+    let choices = []
     for(let option of options){
       let choice = {};
       choice.id = option.innerHTML;
       choice.description = { [locale]: option.innerHTML };
       optionsList.push(choice);
     }
-    console.log('>>>>>',optionsList);
     const definition = {
       name: { [locale]: this.name || this.id },
       description: { [locale]: label },
       type: 'http://adlnet.gov/expapi/activities/cmi.interaction',
       interactionType: 'choice',
-      choices: optionsList
+      choices
     };
     return {
       verb: {

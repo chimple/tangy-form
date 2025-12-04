@@ -12,47 +12,6 @@ export function _generateObjectId(element) {
   return `${baseUrl}/${formId}/${itemId}/${inputId}`;
 }
 
-function generateChoice(element, locale) {
-  const options = Array.from(element.querySelectorAll('option'));
-  return options.map(option => ({
-    id: option.value,
-    description: { [locale]: option.textContent.trim() }
-  }));
-}
-
-export function generateXapiStatement({
-  element,
-  interactionType,
-}) {
-  const locale = document.documentElement.lang || navigator.language;
-  const tempDiv = document.createElement('div');
-  tempDiv.innerHTML = element.label || element.name;
-  const label = tempDiv.textContent || tempDiv.innerText || '';
-  const objectId = _generateObjectId(element);
-  const definition = {
-    name: { [locale]: element.name || element.id },
-    description: { [locale]: label },
-    type: 'http://adlnet.gov/expapi/activities/cmi.interaction',
-    interactionType,
-    // this check if interactionType is 'choice' before adding choices other wise it remove choices
-    ...(interactionType === 'choice' && {
-      choices: generateChoice(element, locale)
-    })
-  };
-
-  
-  return {
-    verb: {
-      id: 'http://adlnet.gov/xapi/verbs/attempted',
-    },
-    object: {
-      id: objectId,
-      objectType: 'Activity',
-      definition,
-    }
-  };
-}
-
 export function shouldIncludeXapi(el) {
   if (!el) return false;
   if (el.hasAttribute('skipped') || el.hasAttribute('hidden') || el.getAttribute('aria-hidden') === 'true') return false;

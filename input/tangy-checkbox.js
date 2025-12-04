@@ -4,7 +4,7 @@ import '@polymer/paper-checkbox/paper-checkbox.js'
 import '../style/tangy-common-styles.js'
 import '../style/tangy-element-styles.js'
 import { TangyInputBase } from '../tangy-input-base.js'
-import { generateXapiStatement } from '../util/tangy.utils.js';
+import { _generateObjectId } from '../util/tangy.utils.js';
 
     /**
      * `tangy-checkbox`
@@ -149,10 +149,37 @@ export class TangyCheckbox extends TangyInputBase {
     };
   }
 
+  generateXapiStatement() {
+    const locale = document.documentElement.lang || navigator.language;
+
+    // get label from this.label or this.name, stripping any HTML tags
+    const tempDiv = document.createElement('div');
+    tempDiv.innerHTML = this.label || this.name;
+    const label = tempDiv.textContent || tempDiv.innerText || '';
+    
+    const objectId = _generateObjectId(this);
+    const definition = {
+      name: { [locale]: this.name || this.id },
+      description: { [locale]: label },
+      type: 'http://adlnet.gov/expapi/activities/cmi.interaction',
+      interactionType: 'fill-in',
+    };
+    return {
+      verb: {
+        id: 'http://adlnet.gov/xapi/verbs/attempted',
+      },
+      object: {
+        id: objectId,
+        objectType: 'Activity',
+        definition,
+      }
+    };
+  }
+
   connectedCallback () {
     super.connectedCallback();
     this.render()
-    this._xapiStatementTemplate = generateXapiStatement({element: this, interactionType: 'fill-in' });
+    this._xapiStatementTemplate = this.generateXapiStatement();
   }
 
   render() {
