@@ -2,6 +2,7 @@ import { PolymerElement, html } from '@polymer/polymer/polymer-element.js';
 import '../util/html-element-props.js'
 import '../style/tangy-common-styles.js'
 import { TangyInputBase } from '../tangy-input-base.js'
+import { _generateObjectId } from '../util/tangy.utils.js';
 
 /**
  * `tangy-acasi`
@@ -136,6 +137,45 @@ export class TangyAcasi extends TangyInputBase {
     };
   }
 
+  // choices = []
+
+  get _xapiStatement(){
+        return {
+          ...this._xapiStatementTemplate,
+          result: {
+            response: this.value,
+          },
+        };
+      }
+    
+      generateXapiStatement() {
+        const locale = document.documentElement.lang || navigator.language;
+    
+        // get label from this.label or this.name, stripping any HTML tags
+        const tempDiv = document.createElement('div');
+        tempDiv.innerHTML = this.label || this.name;
+        const label = tempDiv.textContent || tempDiv.innerText || '';
+        
+        const objectId = _generateObjectId(this);
+        const definition = {
+          name: { [locale]: this.name || this.id },
+          description: { [locale]: label },
+          type: 'http://adlnet.gov/expapi/activities/cmi.interaction',
+          interactionType: 'choice',
+          choice: this.choices
+        };
+        return {
+          verb: {
+            id: 'http://adlnet.gov/xapi/verbs/attempted',
+          },
+          object: {
+            id: objectId,
+            objectType: 'Activity',
+            definition,
+          }
+        };
+      }  
+
 
   // Element class can define custom element reactions
   // @TODO: Duplicating ready?
@@ -143,12 +183,14 @@ export class TangyAcasi extends TangyInputBase {
     super.connectedCallback();
     this.isReady = false
     this.renderOptions()
+    this._xapiStatementTemplate = this.generateXapiStatement();
   }
 
   renderOptions() {
     let paperRadioGroupEl = this.shadowRoot.querySelector('paper-radio-group')
     paperRadioGroupEl.addEventListener('change', this.onPaperRadioGroupChange.bind(this), false)
-
+    const locale = document.documentElement.lang || navigator.language;
+    this.choices = [];
     // Populate paper-radio-button elements by using image data
     // The radio-button value is taken from the imageArray src value.
     // Also create the image.
@@ -159,6 +201,11 @@ export class TangyAcasi extends TangyInputBase {
       let srcArray = src.split('/')
       let filename = srcArray[srcArray.length - 1]
       let name = filename.replace('.png', '')
+      this.choices.push({
+        id: name,
+        description: { [locale]: name }
+      })
+      console.log('Adding ACASI button: ' + name)
       button.name = name
       if (this.disabled) button.setAttribute('disabled', true)
       let imageEl = document.createElement('img')
