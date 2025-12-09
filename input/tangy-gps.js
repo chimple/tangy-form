@@ -270,6 +270,42 @@ class TangyGps extends TangyInputBase {
     };
   }
 
+  get _xapiStatement(){
+    return {
+      ...this._xapiStatementTemplate,
+      result: {
+        response: this.value,
+      },
+    };
+  }
+  
+  generateXapiStatement() {
+    const locale = document.documentElement.lang || navigator.language;
+
+    // get label from this.label or this.name, stripping any HTML tags
+    const tempDiv = document.createElement('div');
+    tempDiv.innerHTML = this.label || this.name;
+    const label = tempDiv.textContent || tempDiv.innerText || '';
+    
+    const objectId = _generateObjectId(this);
+    const definition = {
+      name: { [locale]: this.name || this.id },
+      description: { [locale]: label },
+      type: 'http://adlnet.gov/expapi/activities/cmi.interaction',
+      interactionType: 'other',
+    };
+    return {
+      verb: {
+        id: 'http://adlnet.gov/xapi/verbs/answered',
+      },
+      object: {
+        id: objectId,
+        objectType: 'Activity',
+        definition,
+      }
+    };
+  }
+
   ready() {
     this.hasDelta = false
     super.ready();

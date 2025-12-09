@@ -158,18 +158,20 @@ class TangySelect extends TangyInputBase {
 
     // get label from this.label or this.name, stripping any HTML tags
     const tempDiv = document.createElement('div');
-    tempDiv.innerHTML = element.label || element.name;
+    tempDiv.innerHTML = this.label || this.name;
     const label = tempDiv.textContent || tempDiv.innerText || '';
     
-    const objectId = _generateObjectId(element);
+    const objectId = _generateObjectId(this);
     
     // get options from select element
+    const options = Array.from(this.shadowRoot.querySelectorAll('select option'))
+    .filter(opt => opt.value);
     const choices = options.map(option => ({
       id: option.value,
       description: { [locale]: option.textContent.trim() }
     }));
     const definition = {
-      name: { [locale]: element.name || element.id },
+      name: { [locale]: this.name || this.id },
       description: { [locale]: label },
       type: 'http://adlnet.gov/expapi/activities/cmi.interaction',
       interactionType: 'choice',

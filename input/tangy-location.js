@@ -6,6 +6,7 @@ import '@polymer/paper-input/paper-input.js'
 import '../style/tangy-element-styles.js';
 import '../style/tangy-common-styles.js'
 import { TangyInputBase } from '../tangy-input-base.js'
+import { _generateObjectId } from '../util/tangy.utils.js';
 /**
  * `tangy-location`
  * 
@@ -564,6 +565,43 @@ class TangyLocation extends TangyInputBase {
     this._flatLocationList = Loc.flatten(locationList)
   }
 
+
+    get _xapiStatement(){
+      return {
+        ...this._xapiStatementTemplate,
+        result: {
+          response: this.value,
+        },
+      };
+    }
+  
+    generateXapiStatement() {
+      const locale = document.documentElement.lang || navigator.language;
+  
+      // get label from this.label or this.name, stripping any HTML tags
+      const tempDiv = document.createElement('div');
+      tempDiv.innerHTML = this.label || this.name;
+      const label = tempDiv.textContent || tempDiv.innerText || '';
+      
+      const objectId = _generateObjectId(this);
+      const definition = {
+        name: { [locale]: this.name || this.id },
+        description: { [locale]: label },
+        type: 'http://adlnet.gov/expapi/activities/cmi.interaction',
+        interactionType: 'fill-in',
+      };
+      return {
+        verb: {
+          id: 'http://adlnet.gov/xapi/verbs/attempted',
+        },
+        object: {
+          id: objectId,
+          objectType: 'Activity',
+          definition,
+        }
+      };
+    }
+
   async connectedCallback() {
     super.connectedCallback();
     this._template = this.innerHTML
@@ -571,6 +609,7 @@ class TangyLocation extends TangyInputBase {
     // When we hear change events, it's coming from users interacting with select lists.
     this.shadowRoot.addEventListener('change', this.onSelectionChange.bind(this))
     this.onLocationSrcChange();
+    this._xapiStatementTemplate = this.generateXapiStatement();
   }
 
   onLocationSrcChange() {

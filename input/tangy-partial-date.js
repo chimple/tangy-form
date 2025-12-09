@@ -6,6 +6,7 @@ import '../style/mdc-select-style.js'
 import { t } from '../util/t.js'
 import moment from 'moment'
 import { TangyInputBase } from '../tangy-input-base.js'
+import { _generateObjectId } from '../util/tangy.utils.js';
 /**
  * `tangy-partial-date`
  *
@@ -221,12 +222,49 @@ export class TangyPartialDate extends TangyInputBase {
     }
   }
 
+get _xapiStatement(){
+      return {
+        ...this._xapiStatementTemplate,
+        result: {
+          response: this.value,
+        },
+      };
+    }
+  
+    generateXapiStatement() {
+      const locale = document.documentElement.lang || navigator.language;
+  
+      // get label from this.label or this.name, stripping any HTML tags
+      const tempDiv = document.createElement('div');
+      tempDiv.innerHTML = this.label || this.name;
+      const label = tempDiv.textContent || tempDiv.innerText || '';
+      
+      const objectId = _generateObjectId(this);
+      const definition = {
+        name: { [locale]: this.name || this.id },
+        description: { [locale]: label },
+        type: 'http://adlnet.gov/expapi/activities/cmi.interaction',
+        interactionType: 'fill-in',
+      };
+      return {
+        verb: {
+          id: 'http://adlnet.gov/xapi/verbs/attempted',
+        },
+        object: {
+          id: objectId,
+          objectType: 'Activity',
+          definition,
+        }
+      };
+    }  
+
   connectedCallback() {
     super.connectedCallback()
     this.missingDateErrorText = this.missingDateErrorText === '' ? t("The date is missing. Please enter a valid date.") : this.missingDateErrorText
     this.invalidDateErrorText = this.invalidDateErrorText === '' ? t("The date is not valid. Please enter a valid date.") : this.invalidDateErrorText
     this.futureDateErrorText = this.futureDateErrorText === '' ? t("The date cannot be in the future. Please enter a date that is on or before today.") : this.futureDateErrorText
     this.render()
+    this._xapiStatementTemplate = this.generateXapiStatement();
   }
   
   render() {

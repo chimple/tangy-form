@@ -196,7 +196,7 @@ class TangyCheckboxes extends TangyInputBase {
       let choice = {};
       choice.id = option.innerHTML;
       choice.description = { [locale]: option.innerHTML };
-      optionsList.push(choice);
+      choices.push(choice);
     }
     const definition = {
       name: { [locale]: this.name || this.id },
