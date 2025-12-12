@@ -387,10 +387,17 @@ class TangyTimed extends TangyInputBase {
   }
 
   get _xapiStatement(){
+    console.log(this.startTime, this.timeRemaining, this.timeSpent);
       return {
         ...this._xapiStatementTemplate,
         result: {
           response: this.value,
+          extensions: {
+            "https://example.com/xapi/extensions/time-limit": this.duration,
+            "https://example.com/xapi/extensions/time-taken": Math.floor((Date.now() - this.startTime) / 1000),
+            "https://example.com/xapi/extensions/time-remaining": this.timeRemaining
+
+          }
         },
       };
   }
@@ -519,6 +526,7 @@ class TangyTimed extends TangyInputBase {
       this.value = newValue
     }
 
+    console.log(this.startTime, this.timeRemaining, this.timeSpent);
     this._xapiStatementTemplate = this.generateXapiStatement();
   }
 
