@@ -176,7 +176,11 @@ class TangyCheckboxes extends TangyInputBase {
     return {
       ...this._xapiStatementTemplate,
       result: {
-        response: this.value,
+        response: this.value.filter((option) => {
+          if(option.value === "on"){
+            return option
+          }
+        }),
       },
     };
   }
