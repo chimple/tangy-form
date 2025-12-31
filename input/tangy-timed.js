@@ -387,7 +387,6 @@ class TangyTimed extends TangyInputBase {
   }
 
   get _xapiStatement(){
-    console.log(this.startTime, this.timeRemaining, this.timeSpent);
       return {
         ...this._xapiStatementTemplate,
         result: {
@@ -525,8 +524,6 @@ class TangyTimed extends TangyInputBase {
       })
       this.value = newValue
     }
-
-    console.log(this.startTime, this.timeRemaining, this.timeSpent);
     this._xapiStatementTemplate = this.generateXapiStatement();
   }
 

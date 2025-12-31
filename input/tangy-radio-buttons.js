@@ -312,7 +312,6 @@ generateXapiStatement() {
         newValue.push(el.getProps())
       })
     if (!this.value || (typeof this.value === 'object' && this.value.length < newValue.length)) {
-      console.log('setting value', newValue);
       this.value = newValue
     }
 

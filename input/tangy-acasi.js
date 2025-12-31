@@ -203,7 +203,6 @@ export class TangyAcasi extends TangyInputBase {
         id: name,
         description: { [locale]: name }
       })
-      console.log('Adding ACASI button: ' + name)
       button.name = name
       if (this.disabled) button.setAttribute('disabled', true)
       let imageEl = document.createElement('img')
