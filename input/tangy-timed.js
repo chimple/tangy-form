@@ -390,7 +390,11 @@ class TangyTimed extends TangyInputBase {
       return {
         ...this._xapiStatementTemplate,
         result: {
-          response: this.value,
+          response: this.value.filter((option) => {
+            if(option.value === 'on'){
+              return option
+            }
+          }),
           extensions: {
             "https://example.com/xapi/extensions/time-limit": this.duration,
             "https://example.com/xapi/extensions/time-taken": Math.floor((Date.now() - this.startTime) / 1000),
