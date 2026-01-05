@@ -202,7 +202,7 @@ class TangyConsent extends TangyInputBase {
     };
     return {
       verb: {
-        id: 'http://adlnet.gov/xapi/verbs/attempted',
+        id: 'http://adlnet.gov/xapi/verbs/answered',
       },
       object: {
         id: objectId,

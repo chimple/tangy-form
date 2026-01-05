@@ -188,7 +188,7 @@ export class TangySignature extends TangyInputBase {
     };
     return {
       verb: {
-        id: 'http://adlnet.gov/xapi/verbs/answered',
+        id: 'http://adlnet.gov/xapi/verbs/responded',
       },
       object: {
         id: objectId,

@@ -160,11 +160,11 @@ export class TangyAcasi extends TangyInputBase {
       description: { [locale]: label },
       type: 'http://adlnet.gov/expapi/activities/cmi.interaction',
       interactionType: 'choice',
-      choice: this.choices
+      choices: this.choices
     };
     return {
       verb: {
-        id: 'http://adlnet.gov/xapi/verbs/attempted',
+        id: 'http://adlnet.gov/xapi/verbs/answered',
       },
       object: {
         id: objectId,

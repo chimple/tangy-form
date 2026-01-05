@@ -162,11 +162,15 @@ export class TangyCheckbox extends TangyInputBase {
       name: { [locale]: this.name || this.id },
       description: { [locale]: label },
       type: 'http://adlnet.gov/expapi/activities/cmi.interaction',
-      interactionType: 'fill-in',
+      interactionType: "choice",
+      choices: [{
+        id: this.id,
+        description: { [locale]: this.label }
+      }]
     };
     return {
       verb: {
-        id: 'http://adlnet.gov/xapi/verbs/attempted',
+        id: 'http://adlnet.gov/xapi/verbs/answered',
       },
       object: {
         id: objectId,
