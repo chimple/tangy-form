@@ -84,7 +84,7 @@ export class TangyRadioBlocks extends TangyInputBase {
         </div>
       </div>
     `;
-  }
+  }              
 
   static get properties() {
     return {
