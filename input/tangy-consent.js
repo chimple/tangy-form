@@ -198,11 +198,10 @@ class TangyConsent extends TangyInputBase {
       name: { [locale]: this.name || this.id },
       description: { [locale]: label },
       type: 'http://adlnet.gov/expapi/activities/cmi.interaction',
-      interactionType: 'true-false',
     };
     return {
       verb: {
-        id: 'http://adlnet.gov/xapi/verbs/answered',
+        id: 'http://adlnet.gov/xapi/verbs/agreed',
       },
       object: {
         id: objectId,

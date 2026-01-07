@@ -184,7 +184,6 @@ export class TangySignature extends TangyInputBase {
       name: { [locale]: this.name || this.id },
       description: { [locale]: label },
       type: 'http://adlnet.gov/expapi/activities/cmi.interaction',
-      interactionType: 'other',
     };
     return {
       verb: {

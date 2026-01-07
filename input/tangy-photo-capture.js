@@ -219,8 +219,7 @@ export class TangyPhotoCapture extends TangyInputBase {
       const definition = {
         name: { [locale]: this.name || this.id },
         description: { [locale]: label },
-        type: "https://adlnet.gov/expapi/activities/media",
-        interactionType: "other",
+        type: "https://adlnet.gov/expapi/activities/cmi.interaction",
     };
       return {
         verb: {

@@ -210,7 +210,7 @@ class TangyQr extends TangyInputBase {
       const definition = {
         name: { [locale]: this.name || this.id },
         description: { [locale]: label },
-        type: "https://w3id.org/xapi/video/activity-type/image",
+        type: "https://w3id.org/xapi/video/activity-type/cmi.interaction",
       };
       return {
         verb: {
