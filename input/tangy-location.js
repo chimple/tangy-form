@@ -570,10 +570,28 @@ class TangyLocation extends TangyInputBase {
       return {
         ...this._xapiStatementTemplate,
         result: {
+          extensions: {
+            "https://example.org/x/location": this.toLocationExtension(this.value)
+          },
           response: this.value,
         },
       };
     }
+
+    toLocationExtension(selections) {
+      const levels = selections.map(s => s.level)
+      const values = {}
+      selections.forEach(s => {
+        values[s.level] = { id: s.value, label: s.label }
+      })
+  
+      return {
+        levels,
+        values,
+        path: selections.map(s => s.value).join('.')
+      }
+    }
+
   
     generateXapiStatement() {
       const locale = document.documentElement.lang || navigator.language;
@@ -588,7 +606,6 @@ class TangyLocation extends TangyInputBase {
         name: { [locale]: this.name || this.id },
         description: { [locale]: label },
         type: 'http://adlnet.gov/expapi/activities/cmi.interaction',
-        interactionType: 'fill-in',
       };
       return {
         verb: {
@@ -642,11 +659,13 @@ class TangyLocation extends TangyInputBase {
     // Get levels configured on this.showLevels.
     let levels = []
     if (this.showLevels !== '') {
+      console.log('showLevels:', this.showLevels)
       this.showLevels.split(',').forEach(level => levels.push(level))
     } else {
+      console.log('no showLevels, using all levels')
       this.locationList.locationsLevels.forEach(level => levels.push(level))
     }
-
+    console.log('levels to show:', this.locationList, levels)
     // Get selections from this.value but scaffold out selections if there is no value.
     let selections = [...this.value]
     if (selections.length === 0) {

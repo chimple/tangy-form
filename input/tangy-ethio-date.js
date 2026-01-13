@@ -233,19 +233,34 @@ export class TangyEthiopianDate extends TangyInputBase {
         };
     }
     
-    generateXapiStatement() {
+    generateXapiStatement(months, days, years, unknownText) {
+      try {
       const locale = document.documentElement.lang || navigator.language;
-      
       // get label from this.label or this.name, stripping any HTML tags
       const tempDiv = document.createElement('div');
       tempDiv.innerHTML = this.label || this.name;
       const label = tempDiv.textContent || tempDiv.innerText || '';
-  
+      const choices = [
+        ...years.map(year => ({
+          id: `year-${year === 9999 ? unknownText : year}`,
+          description: { [locale]: year === 9999 ? unknownText : String(year) }
+        })),
+        ...months.map((month, i) => ({
+          id: `month-${month === 99 ? unknownText : month}`,
+          description: { [locale]: month === 99 ? unknownText : String(month) }
+        })),
+        ...days.map(day => ({
+          id: `day-${day === 99 ? unknownText : day}`,
+          description: { [locale]: day === 99 ? unknownText : String(day) }
+        }))
+      ];
       const objectId = _generateObjectId(this);
       const definition = {
         name: { [locale]: this.name || this.id },
         description: { [locale]: label },
         type: 'http://adlnet.gov/expapi/activities/cmi.interaction',
+        interactionType: 'choice',
+        choices
       };
       return {
         verb: {
@@ -257,6 +272,9 @@ export class TangyEthiopianDate extends TangyInputBase {
           definition,
         }
       };
+      } catch(error) {
+        console.log('>>>>',error)
+      }
     }
 
   connectedCallback() {
@@ -265,7 +283,6 @@ export class TangyEthiopianDate extends TangyInputBase {
     this.invalidDateErrorText = this.invalidDateErrorText === '' ? t("The date is not valid. Please enter a valid date.") : this.invalidDateErrorText
     this.futureDateErrorText = this.futureDateErrorText === '' ? t("The date cannot be in the future. Please enter a date that is on or before today.") : this.futureDateErrorText
     this.render()
-    this._xapiStatementTemplate = this.generateXapiStatement()
   }
   
   render() {
@@ -373,6 +390,8 @@ export class TangyEthiopianDate extends TangyInputBase {
       this.shadowRoot.querySelector("select[name='day']").value = this.unpad(dateValue.split("-")[2]);
 
     }
+
+    this._xapiStatementTemplate = this.generateXapiStatement(months, days, years, unknownText);
   }
 
   /*
