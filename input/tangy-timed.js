@@ -386,23 +386,18 @@ class TangyTimed extends TangyInputBase {
     };
   }
 
-  get _xapiStatement(){
-      return {
-        ...this._xapiStatementTemplate,
-        result: {
-          response: this.value.filter((option) => {
-            if(option.value === 'on'){
-              return option
-            }
-          }),
-          extensions: {
-            "https://example.com/xapi/extensions/time-limit": this.duration,
-            "https://example.com/xapi/extensions/time-taken": Math.floor((Date.now() - this.startTime) / 1000),
-            "https://example.com/xapi/extensions/time-remaining": this.timeRemaining
-
-          }
-        },
-      };
+  get _xapiStatement() {
+    const totalSeconds = Math.floor((Date.now() - this.startTime) / 1000);
+    const hours = Math.floor(totalSeconds / 3600);
+    const minutes = Math.floor((totalSeconds % 3600) / 60);
+    const seconds = totalSeconds % 60;
+    return {
+      ...this._xapiStatementTemplate,
+      result: {
+        response: this.value.filter(option => option.value === 'on'),
+        duration: `PT${hours}H${minutes}M${seconds}S`
+      }
+    };
   }
   
   generateXapiStatement() {
