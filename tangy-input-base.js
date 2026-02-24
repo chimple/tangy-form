@@ -1,10 +1,20 @@
 import { PolymerElement } from '@polymer/polymer/polymer-element.js';
+import { shouldIncludeXapi } from './util/tangy.utils';
 
 export class TangyInputBase extends PolymerElement {
 
   connectedCallback() {
     super.connectedCallback()
     this._initialProps = super.getProps()
+  }
+
+  getProps() {
+    const baseProps = super.getProps ? super.getProps() : {};
+    const inputXapiStatement = shouldIncludeXapi(this) ? (this._xapiStatement || null) : null;
+    return {
+      ...baseProps,
+      xapiStatement: inputXapiStatement,
+    };
   }
 
   getModProps() {

@@ -5,6 +5,7 @@ import './tangy-checkbox.js'
 import '../style/tangy-element-styles.js';
 import '../style/tangy-common-styles.js'
 import { TangyInputBase } from '../tangy-input-base.js'
+import { _generateObjectId } from '../util/tangy.utils.js';
 
 /**
  * `tangy-checkboxes`
@@ -171,6 +172,55 @@ class TangyCheckboxes extends TangyInputBase {
     }
   }
 
+  get _xapiStatement(){
+    return {
+      ...this._xapiStatementTemplate,
+      result: {
+        response: this.value.filter((option) => {
+          if(option.value === "on"){
+            return option
+          }
+        }),
+      },
+    };
+  }
+
+  generateXapiStatement() {
+    const locale = document.documentElement.lang || navigator.language;
+
+    // get label from this.label or this.name, stripping any HTML tags
+    const tempDiv = document.createElement('div');
+    tempDiv.innerHTML = this.label || this.name;
+    const label = tempDiv.textContent || tempDiv.innerText || '';
+
+    const objectId = _generateObjectId(this);
+    let options = this.querySelectorAll('option');
+    let choices = []
+    for(let option of options){
+      let choice = {};
+      choice.id = option.innerHTML;
+      choice.description = { [locale]: option.innerHTML };
+      choices.push(choice);
+    }
+    const definition = {
+      name: { [locale]: this.name || this.id },
+      description: { [locale]: label },
+      type: 'http://adlnet.gov/expapi/activities/cmi.interaction',
+      interactionType: 'choice',
+      choices
+    };
+    return {
+      verb: {
+        id: 'http://adlnet.gov/xapi/verbs/answered',
+      },
+      object: {
+        id: objectId,
+        objectType: 'Activity',
+        definition,
+      }
+    };
+  }
+
   connectedCallback() {
     super.connectedCallback()
     this.render()
@@ -218,6 +268,7 @@ class TangyCheckboxes extends TangyInputBase {
     if (!this.value || (typeof this.value === 'object' && this.value.length < newValue.length)) {
       this.value = newValue
     }
+    this._xapiStatementTemplate = this.generateXapiStatement();
   }
 
   onSkippedChange(newValue, oldValue) {
