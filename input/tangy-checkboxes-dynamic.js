@@ -5,6 +5,7 @@ import './tangy-checkbox.js'
 import '../style/tangy-element-styles.js';
 import '../style/tangy-common-styles.js'
 import { TangyInputBase } from '../tangy-input-base.js'
+import { _generateObjectId } from '../util/tangy.utils.js';
 
 /**
  * `tangy-checkboxes`
@@ -135,8 +136,50 @@ class TangyCheckboxesDynamic extends TangyInputBase {
     this._optionsList = optionsList
   }
 
+  get _xapiStatement(){
+    return {
+      ...this._xapiStatementTemplate,
+      result: {
+        response: this.value.filter((option) => {
+          if(option.value === "on"){
+            return option
+          }
+        }),
+      },
+    };
+  }
+
+generateXapiStatement() {
+  const locale = document.documentElement.lang || navigator.language;
+  const tempDiv = document.createElement('div');
+  tempDiv.innerHTML = this.label || this.name;
+  const label = tempDiv.textContent || tempDiv.innerText || '';
+  const objectId = _generateObjectId(this);
+  const definition = {
+    name: { [locale]: this.name || this.id },
+    description: { [locale]: label },
+    type: 'http://adlnet.gov/expapi/activities/cmi.interaction',
+    interactionType: 'choice',
+    choices: this.optionsList.map(option => ({
+      id: option.innerHTML,
+      description: { [locale]: option.innerHTML }
+    })),
+  };
+  return {
+    verb: {
+      id: 'http://adlnet.gov/xapi/verbs/answered',
+    },
+    object: {
+      id: objectId,
+      objectType: 'Activity',
+      definition,
+    }
+  };
+}
+
+
   connectedCallback() {
-    super.connectedCallback()
+    super.connectedCallback();
 
     let that = this
     const request = new XMLHttpRequest();
@@ -167,6 +210,7 @@ class TangyCheckboxesDynamic extends TangyInputBase {
 
           that.render()
           that.dispatchEvent(new CustomEvent('checkbox-options-loaded'))
+          
         } catch (e) {
           // Do nothing. Some stages will not have valid JSON returned.
         }
@@ -199,6 +243,7 @@ class TangyCheckboxesDynamic extends TangyInputBase {
       this.value = newValue
     }
     containerEl.appendChild(checkboxesEl)
+    this._xapiStatementTemplate = this.generateXapiStatement();
   }
 
   onCheckboxesClick(event) {

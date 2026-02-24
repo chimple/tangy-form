@@ -10,6 +10,7 @@ import "@polymer/paper-button/paper-button.js";
 import { TangyInputBase } from "../tangy-input-base.js";
 import { getWaveBlob } from "../util/webmToWavConverter.js";
 import AudioMotionAnalyzer from 'audiomotion-analyzer';
+import { _generateObjectId } from "../util/tangy.utils.js";
 
 export class TangyAudioRecording extends TangyInputBase {
   static get template() {
@@ -183,6 +184,41 @@ export class TangyAudioRecording extends TangyInputBase {
     };
   }
 
+  get _xapiStatement(){
+    return {
+      ...this._xapiStatementTemplate,
+      result: {
+        response: this.value,
+      },
+    };
+  }
+    
+  generateXapiStatement() {
+    const locale = document.documentElement.lang || navigator.language;
+
+    // get label from this.label or this.name, stripping any HTML tags
+    const tempDiv = document.createElement('div');
+    tempDiv.innerHTML = this.label || this.name;
+    const label = tempDiv.textContent || tempDiv.innerText || '';
+    
+    const objectId = _generateObjectId(this);
+    const definition = {
+      name: { [locale]: this.name || this.id },
+      description: { [locale]: label },
+      type: 'http://adlnet.gov/expapi/activities/cmi.interaction',
+    };
+    return {
+      verb: {
+         id: "http://adlnet.gov/expapi/verbs/responded",
+      },
+      object: {
+        id: objectId,
+        objectType: 'Activity',
+        definition,
+      }
+    };
+  } 
+
   connectedCallback() {
     super.connectedCallback();
         this.shadowRoot.querySelector("#qnum-number").innerHTML = this.hasAttribute(
@@ -198,6 +234,7 @@ export class TangyAudioRecording extends TangyInputBase {
     this.shadowRoot.querySelector("#deleteRecording").style.display = "none";
     this.shadowRoot.querySelector("#recording-time").style.display = "none";
     this.shadowRoot.querySelector("#audio-motion-container").style.display = "none";
+    this._xapiStatementTemplate = this.generateXapiStatement();
   }
 
   disconnectedCallback() {

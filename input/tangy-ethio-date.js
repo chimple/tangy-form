@@ -7,6 +7,7 @@ import { t } from '../util/t.js'
 import moment from 'moment'
 import * as ethiopianDate from 'ethiopian-date/index.js'
 import { TangyInputBase } from '../tangy-input-base.js'
+import { _generateObjectId } from '../util/tangy.utils.js';
 
 /**
  * `tangy-ethio-date`
@@ -223,6 +224,59 @@ export class TangyEthiopianDate extends TangyInputBase {
     }
   }
 
+  get _xapiStatement(){
+        return {
+          ...this._xapiStatementTemplate,
+          result: {
+            response: this.value,
+          },
+        };
+    }
+    
+    generateXapiStatement(months, days, years, unknownText) {
+      try {
+      const locale = document.documentElement.lang || navigator.language;
+      // get label from this.label or this.name, stripping any HTML tags
+      const tempDiv = document.createElement('div');
+      tempDiv.innerHTML = this.label || this.name;
+      const label = tempDiv.textContent || tempDiv.innerText || '';
+      const choices = [
+        ...years.map(year => ({
+          id: `year-${year === 9999 ? unknownText : year}`,
+          description: { [locale]: year === 9999 ? unknownText : String(year) }
+        })),
+        ...months.map((month, i) => ({
+          id: `month-${month === 99 ? unknownText : month}`,
+          description: { [locale]: month === 99 ? unknownText : String(month) }
+        })),
+        ...days.map(day => ({
+          id: `day-${day === 99 ? unknownText : day}`,
+          description: { [locale]: day === 99 ? unknownText : String(day) }
+        }))
+      ];
+      const objectId = _generateObjectId(this);
+      const definition = {
+        name: { [locale]: this.name || this.id },
+        description: { [locale]: label },
+        type: 'http://adlnet.gov/expapi/activities/cmi.interaction',
+        interactionType: 'choice',
+        choices
+      };
+      return {
+        verb: {
+          id: 'http://adlnet.gov/xapi/verbs/answered',
+        },
+        object: {
+          id: objectId,
+          objectType: 'Activity',
+          definition,
+        }
+      };
+      } catch(error) {
+        console.log('>>>>',error)
+      }
+    }
+
   connectedCallback() {
     super.connectedCallback()
     this.missingDateErrorText = this.missingDateErrorText === '' ? t("The date is missing. Please enter a valid date.") : this.missingDateErrorText
@@ -336,6 +390,8 @@ export class TangyEthiopianDate extends TangyInputBase {
       this.shadowRoot.querySelector("select[name='day']").value = this.unpad(dateValue.split("-")[2]);
 
     }
+
+    this._xapiStatementTemplate = this.generateXapiStatement(months, days, years, unknownText);
   }
 
   /*

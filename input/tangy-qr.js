@@ -9,6 +9,7 @@ import '@polymer/iron-icon/iron-icon.js'
 import '@polymer/iron-icons/image-icons.js'
 import { t } from '../util/t.js'
 import { TangyInputBase } from '../tangy-input-base.js'
+import { _generateObjectId } from '../util/tangy.utils.js';
 /**
  * `tangy-scan`
  * 
@@ -188,6 +189,41 @@ class TangyQr extends TangyInputBase {
     };
   }
 
+  get _xapiStatement(){
+      return {
+        ...this._xapiStatementTemplate,
+        result: {
+          response: this.value,
+        },
+      };
+    }
+      
+    generateXapiStatement() {
+      const locale = document.documentElement.lang || navigator.language;
+  
+      // get label from this.label or this.name, stripping any HTML tags
+      const tempDiv = document.createElement('div');
+      tempDiv.innerHTML = this.label || this.name;
+      const label = tempDiv.textContent || tempDiv.innerText || '';
+      
+      const objectId = _generateObjectId(this);
+      const definition = {
+        name: { [locale]: this.name || this.id },
+        description: { [locale]: label },
+        type: "https://w3id.org/xapi/video/activity-type/cmi.interaction",
+      };
+      return {
+        verb: {
+           id: "http://adlnet.gov/expapi/verbs/responded",
+        },
+        object: {
+          id: objectId,
+          objectType: 'Activity',
+          definition,
+        }
+      };
+    } 
+
   connectedCallback() {
     super.connectedCallback()
     this.t = {
@@ -206,6 +242,7 @@ class TangyQr extends TangyInputBase {
       ? `<label>${this.getAttribute('question-number')}</label>`
       : ''
     this.video = null;
+    this._xapiStatementTemplate = this.generateXapiStatement();
   }
 
   disconnectedCallback() {

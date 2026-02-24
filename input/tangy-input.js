@@ -7,6 +7,7 @@ import '@polymer/paper-input/paper-input.js'
 import '../style/tangy-common-styles.js'
 import '../style/tangy-element-styles.js'
 import { combTranslations } from 'translation-web-component/util.js'
+import { _generateObjectId } from '../util/tangy.utils.js';
 
 /**
  * `tangy-input`
@@ -190,6 +191,42 @@ export class TangyInput extends TangyInputBase {
     }
   }
 
+  get _xapiStatement(){
+    return {
+      ...this._xapiStatementTemplate,
+      result: {
+        response: this.value,
+      },
+    };
+  }
+
+   generateXapiStatement() {
+      const locale = document.documentElement.lang || navigator.language;
+
+      // get label from this.label or this.name, stripping any HTML tags
+      const tempDiv = document.createElement('div');
+      tempDiv.innerHTML = this.label || this.name;
+      const label = tempDiv.textContent || tempDiv.innerText || '';
+
+      const objectId = _generateObjectId(this);
+      const definition = {
+        name: { [locale]: this.name || this.id },
+        description: { [locale]: label },
+        type: 'http://adlnet.gov/expapi/activities/cmi.interaction',
+        interactionType: 'fill-in',
+      };
+      return {
+        verb: {
+          id: 'http://adlnet.gov/xapi/verbs/answered',
+        },
+        object: {
+          id: objectId,
+          objectType: 'Activity',
+          definition,
+        }
+      };
+    }
+
   connectedCallback() {
     super.connectedCallback()
     // Template.
@@ -229,7 +266,7 @@ export class TangyInput extends TangyInputBase {
     document.body.addEventListener('lang-ready', this.reflect.bind(this))
     this.ready = true
     this.reflect()
-
+    this._xapiStatementTemplate = this.generateXapiStatement();
   }
 
   reflect() {

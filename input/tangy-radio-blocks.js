@@ -6,6 +6,7 @@ import '../style/tangy-element-styles.js';
 import '../style/tangy-common-styles.js'
 import { TangyInputBase } from '../tangy-input-base.js'
 import './tangy-radio-block.js'
+import { _generateObjectId } from '../util/tangy.utils.js';
 /**
  * `tangy-radio-blocks`
  *
@@ -83,7 +84,7 @@ export class TangyRadioBlocks extends TangyInputBase {
         </div>
       </div>
     `;
-  }
+  }              
 
   static get properties() {
     return {
@@ -209,6 +210,50 @@ export class TangyRadioBlocks extends TangyInputBase {
     }
   }
 
+  get _xapiStatement() {
+      return {
+        ...this._xapiStatementTemplate,
+        result: {
+          response: (this.value.find(v => v.value === 'on') || {}).name || '',
+        },
+      };
+    }
+  
+  generateXapiStatement() {
+    const locale = document.documentElement.lang || navigator.language;
+    // get label from this.label or this.name, stripping any HTML tags
+    const tempDiv = document.createElement('div');
+    tempDiv.innerHTML = this.label || this.name;
+    const label = tempDiv.textContent || tempDiv.innerText || '';
+    
+    const objectId = _generateObjectId(this);
+    
+    //creating choices from options
+    const options = Array.from(this.querySelectorAll('option'));
+    const choices = options.map(option => ({
+      id: option.value,
+      description: { [locale]: option.textContent.trim() }
+    }));
+    const definition = {
+      name: { [locale]: this.name || this.id },
+      description: { [locale]: label },
+      type: 'http://adlnet.gov/expapi/activities/cmi.interaction',
+      interactionType: 'choice',
+      choices
+    };
+  
+    return {
+      verb: {
+        id: 'http://adlnet.gov/xapi/verbs/answered',
+      },
+      object: {
+        id: objectId,
+        objectType: 'Activity',
+        definition,
+      }
+    };
+  }
+
   ready() {
     super.ready()
     this.render()
@@ -222,6 +267,7 @@ export class TangyRadioBlocks extends TangyInputBase {
     if (this.orientation === 'rows') {
       this.shadowRoot.querySelector('#blockContainer').setAttribute('class', 'columns')
     }
+     this._xapiStatementTemplate = this.generateXapiStatement();
   }
 
   reflect() {
